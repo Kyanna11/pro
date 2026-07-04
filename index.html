@@ -2,6 +2,16 @@
 <html lang="zh-CN" data-theme="whiteblue">
 <head>
   <meta charset="UTF-8">
+  <!-- PWA基础配置 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="abyssal letter">
+<meta name="theme-color" content="#222222">
+<!-- 读取manifest清单 -->
+<link rel="manifest" href="/manifest.json">
+<!-- iOS桌面图标，使用你上传的图片 -->
+<link rel="apple-touch-icon" href="/F9DDF07E-169D-48E5-BD28-8FF3A5EF0900.jpeg">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
   <meta name="theme-color" content="#EFF4FA" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#1A1525" media="(prefers-color-scheme: dark)">
@@ -810,5 +820,13 @@
     console.log('📡 API:',getApiBase()||'(未配置)');
     console.log('🎨 美化: 主题'+getTheme()+', 字体'+getFontSize()+', 圆角'+getRadius()+', 透明度'+getAlpha());
   </script>
+ <script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js")
+      .catch(err => console.log("SW注册失败：", err));
+  });
+}
+</script> 
 </body>
 </html>
