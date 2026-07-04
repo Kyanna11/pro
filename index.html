@@ -2,22 +2,17 @@
 <html lang="zh-CN" data-theme="whiteblue">
 <head>
   <meta charset="UTF-8">
-  <!-- PWA基础配置 -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#ffffff">
-<!-- 读取manifest清单 -->
-<link rel="manifest" href="/manifest.json">
-<!-- iOS桌面图标，使用你上传的图片 -->
-<link rel="apple-touch-icon" href="/F9DDF07E-169D-48E5-BD28-8FF3A5EF0900.jpeg">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-  <meta name="theme-color" content="#EFF4FA" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#1A1525" media="(prefers-color-scheme: dark)">
+  <!-- PWA基础配置 (原样保留) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="abyssal letter">
-  <title>abyssal letter · 潮汐回响</title>
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/F9DDF07E-169D-48E5-BD28-8FF3A5EF0900.jpeg">
+  <meta name="theme-color" content="#EFF4FA" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1A1525" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-title" content="彼端">
+  <title>彼端 · 潮汐回响</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
@@ -129,6 +124,7 @@
     .row .checkbox.checked::after{content:"✓";color:#fff;font-size:14px;font-weight:700;}
     .row .checkbox.show{display:flex;}
     .row .bubble{cursor:pointer;}
+    /* ===== 气泡 + 小尾巴（接近参考图风格） ===== */
     .bubble{
       max-width:min(61vw,506px);
       padding:clamp(8px,1.05vw,12px) clamp(13px,1.65vw,18px) clamp(8px,1.1vw,13px);
@@ -139,10 +135,46 @@
       word-wrap:break-word;overflow-wrap:break-word;
       transition:background 0.3s,color 0.3s,box-shadow 0.3s,border-radius 0.2s;
     }
-    .row.ai .bubble{background:var(--bubble-ai-bg);color:var(--bubble-ai-fg);box-shadow:0 10px 28px rgba(78,94,108,0.08);}
-    .row.human .bubble{background:var(--bubble-human-bg);color:var(--bubble-human-fg);box-shadow:0 10px 28px rgba(78,94,108,0.08);}
-    .row.ai.tail .bubble{border-bottom-left-radius:2px;}
-    .row.human.tail .bubble{border-bottom-right-radius:2px;}
+    .row.ai .bubble{
+      background:var(--bubble-ai-bg);
+      color:var(--bubble-ai-fg);
+      box-shadow:0 10px 28px rgba(78,94,108,0.08);
+    }
+    .row.human .bubble{
+      background:var(--bubble-human-bg);
+      color:var(--bubble-human-fg);
+      box-shadow:0 10px 28px rgba(78,94,108,0.08);
+    }
+    /* 小尾巴：AI 的朝左，人的朝右 */
+    .row.ai .bubble::after{
+      content:'';
+      position:absolute;
+      left:-8px;
+      bottom:8px;
+      width:0;
+      height:0;
+      border:8px solid transparent;
+      border-right-color:var(--bubble-ai-bg);
+      border-left:0;
+      transition:border-color 0.3s;
+    }
+    .row.human .bubble::after{
+      content:'';
+      position:absolute;
+      right:-8px;
+      bottom:8px;
+      width:0;
+      height:0;
+      border:8px solid transparent;
+      border-left-color:var(--bubble-human-bg);
+      border-right:0;
+      transition:border-color 0.3s;
+    }
+    /* 分组消息（连续同一个人）去掉尾巴，保留最后一条 */
+    .row.grouped .bubble::after{display:none;}
+    .row.tail .bubble::after{display:block;}
+    .row.tail.grouped .bubble::after{display:block;}
+
     .bubble .txt{white-space:normal;}
     .bubble .txt img{max-width:100%;border-radius:8px;margin:6px 0;display:block;}
     .meta{display:inline;margin-left:clamp(10px,1.4vw,16px);white-space:nowrap;font-size:clamp(11px,1.3vw,14px);color:var(--text-faint);user-select:none;vertical-align:baseline;font-family:"Cormorant Garamond",Georgia,serif;transition:color 0.3s;}
@@ -376,7 +408,7 @@
     /* ===== 长按菜单 ===== */
     .msg-menu-overlay{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,0.3);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity 0.25s;}
     .msg-menu-overlay.open{opacity:1;pointer-events:auto;}
-    .msg-menu{position:fixed;bottom:0;left:0;right:0;max-width:var(--ref-width);margin:0 auto;background:var(--bg);border-radius:24px 24px 0 0;padding:12px 0 calc(12px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1),background 0.3s;z-index:251;}
+    .msg-menu{position:fixed;bottom:0;left:0;right:0;max-width:var(--ref-width));margin:0 auto;background:var(--bg);border-radius:24px 24px 0 0;padding:12px 0 calc(12px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1),background 0.3s;z-index:251;}
     .msg-menu-overlay.open .msg-menu{transform:translateY(0);}
     .msg-menu .handle{width:40px;height:4px;border-radius:2px;background:var(--text-faint);margin:0 auto 12px;opacity:0.4;}
     .msg-menu .menu-item{padding:14px 20px;border:none;background:transparent;color:var(--text);font-size:16px;font-family:inherit;width:100%;text-align:left;cursor:pointer;transition:background 0.15s;border-bottom:1px solid var(--card-line);}
@@ -495,6 +527,8 @@
       <input id="settingName" type="text" placeholder="给 AI 起个名字" value="Claude">
       <label>AI 人设</label>
       <textarea id="settingPersona" rows="3" placeholder="你是一个温柔、有哲思的 AI 伴侣..."></textarea>
+      <label>用户档案</label>
+      <textarea id="settingUserProfile" rows="3" placeholder="例如：我是一个喜欢喝咖啡、养了一只猫叫糯米的用户。"></textarea>
       <label>起始日期</label>
       <input id="settingStartDate" type="date" value="2026-03-28">
       <label>API 地址</label>
@@ -606,7 +640,7 @@
   <div class="toast" id="toast"></div>
   <script>
     // ============================================================
-    //  🧠 完整 JavaScript
+    //  🧠 完整 JavaScript（含记忆检索 + AI 自动记录印象 + 用户档案）
     // ============================================================
     function getApiBase(){return localStorage.getItem('custom_api')||''}
     function getApiKey(){return localStorage.getItem('custom_key')||''}
@@ -619,6 +653,7 @@
     function getFontSize(){return localStorage.getItem('font_size')||'medium'}
     function getRadius(){return localStorage.getItem('radius')||'medium'}
     function getAlpha(){return parseFloat(localStorage.getItem('bg_alpha')||'0.6')}
+    function getUserProfile(){return localStorage.getItem('user_profile')||''}
 
     function applyBeautify(){
       const fs = getFontSize();
@@ -640,6 +675,7 @@
       document.getElementById('settingName').value=getAiName();
       document.getElementById('settingPersona').value=getPersona();
       document.getElementById('settingStartDate').value=getStartDate();
+      document.getElementById('settingUserProfile').value=getUserProfile();
       const av=getAvatar();
       if(av){document.getElementById('avatarPreview').style.backgroundImage='url('+av+')';document.querySelector('.avatar').style.backgroundImage='url('+av+')';updateAllAvatars(av);}
       else{document.getElementById('avatarPreview').style.backgroundImage='';document.querySelector('.avatar').style.backgroundImage='';updateAllAvatars('');}
@@ -668,12 +704,15 @@
       const name=document.getElementById('settingName').value.trim()||'Claude';
       const persona=document.getElementById('settingPersona').value.trim();
       const startDate=document.getElementById('settingStartDate').value;
+      const userProfile=document.getElementById('settingUserProfile').value.trim();
       if(api)localStorage.setItem('custom_api',api);
       if(key)localStorage.setItem('custom_key',key);
       if(model)localStorage.setItem('custom_model',model);
       localStorage.setItem('ai_name',name);
       localStorage.setItem('ai_persona',persona);
       if(startDate)localStorage.setItem('start_date',startDate);
+      if(userProfile)localStorage.setItem('user_profile',userProfile);
+      else localStorage.removeItem('user_profile');
       const theme=document.querySelector('#themeSeg .active')?.dataset?.val||'whiteblue';
       localStorage.setItem('companion_theme',theme);
       const fs=document.querySelector('#fontSizeSeg .active')?.dataset?.val||'medium';
@@ -702,7 +741,9 @@
     let toastTimer=null;
     function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2000);}
 
-    // ===== CHAT（完整保留）=====
+    // ============================================================
+    //  💬 CHAT
+    // ============================================================
     let chatMessages=[],messageByKey=new Map(),messageSeq=0,isWaiting=false,newMsgCount=0,pendingImages=[],currentPage=0,editingMsgKey=null,multiSelectMode=false,selectedKeys=new Set(),longPressTarget=null;
     const PAGE_SIZE=30;
     function msgKey(id){return String(id)}
@@ -738,7 +779,205 @@
     function compressImage(file,maxWidth=800,quality=0.6){return new Promise((resolve)=>{const reader=new FileReader();reader.onload=function(e){const img=new Image();img.onload=function(){const canvas=document.createElement('canvas');let w=img.width,h=img.height;if(w>maxWidth){h=h*maxWidth/w;w=maxWidth}canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);const dataUrl=canvas.toDataURL('image/jpeg',quality);resolve(dataUrl)};img.onerror=function(){resolve(null)};img.src=e.target.result};reader.onerror=function(){resolve(null)};reader.readAsDataURL(file)})}
     function updateImagePreview(){const wrap=document.getElementById('imagePreviewWrap');if(pendingImages.length===0){wrap.classList.add('hidden');return}wrap.classList.remove('hidden');wrap.innerHTML='';for(let i=0;i<pendingImages.length;i++){const item=document.createElement('div');item.className='preview-item';const img=document.createElement('img');img.src=pendingImages[i];item.appendChild(img);const rm=document.createElement('button');rm.className='remove';rm.textContent='×';rm.addEventListener('click',function(e){e.stopPropagation();pendingImages.splice(i,1);updateImagePreview()});item.appendChild(rm);wrap.appendChild(item)}}
 
-    async function sendMessageToAI(text,opts={}){const key=getApiKey();const base=getApiBase();if(!key||!base){showToast('请先在设置里配置 API');return}if(isWaiting)return;isWaiting=true;document.getElementById('sendBtn').disabled=true;const images=pendingImages.slice();pendingImages=[];updateImagePreview();if(!opts.silent){if(text||images.length){const userMsg={id:'user-'+Date.now(),from:'human',text:text||'',ts:new Date().toISOString(),images:images};addMessage(userMsg,{stickToBottom:true});document.getElementById('input').value='';document.getElementById('input').style.height='auto'}isWaiting=false;document.getElementById('sendBtn').disabled=false;scrollToBottom();resetPagination();showToast('已发送');return}const aiId='ai-'+Date.now();addMessage({id:aiId,from:'ai',text:'',ts:new Date().toISOString()},{stickToBottom:true});try{const persona=getPersona();const model=getApiModel();const history=sortedMessages().slice(-10);const messages=[];if(persona)messages.push({role:'system',content:persona});for(const m of history){if(m.from==='human'){if(m.images&&m.images.length){const content=[{type:'text',text:m.text||''}];for(const img of m.images){content.push({type:'image_url',image_url:{url:img}})}messages.push({role:'user',content:content})}else{messages.push({role:'user',content:m.text||''})}}else if(m.from==='ai'){messages.push({role:'assistant',content:m.text||''})}}messages.push({role:'user',content:text});const url=base+'/chat/completions';const payload={model:model,messages:messages,stream:true,temperature:0.8,max_tokens:2000};const response=await fetch(url,{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!response.ok){const errText=await response.text();let errMsg='请求失败: '+response.status;try{const j=JSON.parse(errText);errMsg=j.error?.message||errMsg}catch(e){}throw new Error(errMsg)}const reader=response.body.getReader();const decoder=new TextDecoder();let buffer='',fullText='';while(true){const{done,value}=await reader.read();if(done)break;buffer+=decoder.decode(value,{stream:true});const lines=buffer.split('\n');buffer=lines.pop()||'';for(const line of lines){if(line.startsWith('data: ')){const data=line.slice(6).trim();if(data==='[DONE]')continue;try{const json=JSON.parse(data);const delta=json.choices?.[0]?.delta?.content;if(delta){fullText+=delta;const entry=messageByKey.get(aiId);if(entry){entry.text=fullText;renderMessages({stickToBottom:true})}}}catch(e){}}}}const entry=messageByKey.get(aiId);if(entry&&!entry.text){entry.text='(空回复)';renderMessages({stickToBottom:true})}resetPagination()}catch(err){const entry=messageByKey.get(aiId);if(entry){entry.text='❌ '+err.message;renderMessages({stickToBottom:true})}showToast(err.message)}finally{isWaiting=false;document.getElementById('sendBtn').disabled=false;scrollToBottom()}}
+    // ============================================================
+    //  自动保存印象 + 记忆检索
+    // ============================================================
+    async function autoSaveImpression(userText, aiReply) {
+      const key = getApiKey();
+      const base = getApiBase();
+      const model = getApiModel();
+      if (!key || !base || !aiReply) return;
+      try {
+        const prompt = `从这段对话中提取关于用户的重要信息（喜好、情绪、习惯、愿望、性格特点等），用一句简洁的话总结，不超过30字。用户说：${userText}，AI说：${aiReply}`;
+        const response = await fetch(base + '/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: model,
+            messages: [{ role: 'user', content: prompt }],
+            stream: false,
+            temperature: 0.3,
+            max_tokens: 60
+          })
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        const impression = data.choices?.[0]?.message?.content?.trim();
+        if (impression && impression.length > 0 && !impression.includes('无法') && !impression.includes('没有')) {
+          const today = new Date().toISOString().split('T')[0];
+          const entry = {
+            id: 'mem-' + Date.now(),
+            dateRange: { start: today, end: today },
+            content: impression,
+            source: 'ai',
+            _expanded: false
+          };
+          loadMemory();
+          // 避免重复存入完全一样的印象
+          const exists = memoryEntries.some(m => m.content === impression);
+          if (!exists) {
+            memoryEntries.push(entry);
+            saveMemory();
+          }
+        }
+      } catch (e) {}
+    }
+
+    // ============================================================
+    //  sendMessageToAI（含记忆检索 + 用户档案 + 自动记录印象）
+    // ============================================================
+    async function sendMessageToAI(text, opts={}){
+      const key=getApiKey();
+      const base=getApiBase();
+      if(!key||!base){showToast('请先在设置里配置 API');return}
+      if(isWaiting)return;
+      isWaiting=true;
+      document.getElementById('sendBtn').disabled=true;
+
+      const images=pendingImages.slice();
+      pendingImages=[];
+      updateImagePreview();
+
+      if(!opts.silent){
+        if(text||images.length){
+          const userMsg={id:'user-'+Date.now(),from:'human',text:text||'',ts:new Date().toISOString(),images:images};
+          addMessage(userMsg,{stickToBottom:true});
+          document.getElementById('input').value='';
+          document.getElementById('input').style.height='auto';
+        }
+        isWaiting=false;
+        document.getElementById('sendBtn').disabled=false;
+        scrollToBottom();
+        resetPagination();
+        showToast('已发送');
+        return;
+      }
+
+      // ===== 静默模式：调用 AI =====
+      const aiId='ai-'+Date.now();
+      addMessage({id:aiId,from:'ai',text:'',ts:new Date().toISOString()},{stickToBottom:true});
+
+      try{
+        const persona=getPersona();
+        const model=getApiModel();
+        const history=sortedMessages().slice(-10);
+        const messages=[];
+
+        // 1. 人设
+        if(persona) messages.push({role:'system',content:persona});
+
+        // ===== 2. 记忆检索（关键词匹配） =====
+        loadMemory();
+        const keywords = text.toLowerCase().split(/\s+/).filter(w => w.length > 1);
+        let relevantMemories = [];
+        if (keywords.length > 0) {
+          relevantMemories = memoryEntries.filter(m => {
+            const content = m.content.toLowerCase();
+            return keywords.some(kw => content.includes(kw));
+          });
+        }
+        // 如果没有匹配的，加载最近 5 条
+        if (relevantMemories.length === 0) {
+          relevantMemories = memoryEntries.slice(-5);
+        }
+        // 按日期倒序排序
+        relevantMemories.sort((a,b)=>b.dateRange.start.localeCompare(a.dateRange.start));
+
+        if (relevantMemories.length > 0) {
+          const memoryText = relevantMemories.slice(0, 10).map(m =>
+            `[${m.dateRange.start}] ${m.content}`
+          ).join('\n');
+          messages.push({
+            role:'system',
+            content:`以下是用户的相关记忆，请记住它们，在回答时可以参考：\n${memoryText}`
+          });
+        }
+
+        // ===== 3. 用户档案 =====
+        const userProfile = getUserProfile();
+        if(userProfile){
+          messages.push({
+            role:'system',
+            content:`用户档案：${userProfile}`
+          });
+        }
+
+        // 4. 历史消息
+        for(const m of history){
+          if(m.from==='human'){
+            if(m.images&&m.images.length){
+              const content=[{type:'text',text:m.text||''}];
+              for(const img of m.images){content.push({type:'image_url',image_url:{url:img}})}
+              messages.push({role:'user',content:content});
+            }else{
+              messages.push({role:'user',content:m.text||''});
+            }
+          }else if(m.from==='ai'){
+            messages.push({role:'assistant',content:m.text||''});
+          }
+        }
+        messages.push({role:'user',content:text});
+
+        const url=base+'/chat/completions';
+        const payload={model:model,messages:messages,stream:true,temperature:0.8,max_tokens:2000};
+
+        const response=await fetch(url,{
+          method:'POST',
+          headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+          body:JSON.stringify(payload)
+        });
+
+        if(!response.ok){
+          const errText=await response.text();
+          let errMsg='请求失败: '+response.status;
+          try{const j=JSON.parse(errText);errMsg=j.error?.message||errMsg}catch(e){}
+          throw new Error(errMsg);
+        }
+
+        const reader=response.body.getReader();
+        const decoder=new TextDecoder();
+        let buffer='',fullText='';
+        while(true){
+          const{done,value}=await reader.read();
+          if(done)break;
+          buffer+=decoder.decode(value,{stream:true});
+          const lines=buffer.split('\n');
+          buffer=lines.pop()||'';
+          for(const line of lines){
+            if(line.startsWith('data: ')){
+              const data=line.slice(6).trim();
+              if(data==='[DONE]')continue;
+              try{
+                const json=JSON.parse(data);
+                const delta=json.choices?.[0]?.delta?.content;
+                if(delta){
+                  fullText+=delta;
+                  const entry=messageByKey.get(aiId);
+                  if(entry){entry.text=fullText;renderMessages({stickToBottom:true})}
+                }
+              }catch(e){}
+            }
+          }
+        }
+        const entry=messageByKey.get(aiId);
+        if(entry&&!entry.text){entry.text='(空回复)';renderMessages({stickToBottom:true})}
+        resetPagination();
+
+        // ===== 5. AI 自动记录印象（静默，不阻塞主流程） =====
+        if (fullText && fullText.length > 5) {
+          autoSaveImpression(text, fullText);
+        }
+
+      }catch(err){
+        const entry=messageByKey.get(aiId);
+        if(entry){entry.text='❌ '+err.message;renderMessages({stickToBottom:true})}
+        showToast(err.message);
+      }finally{
+        isWaiting=false;
+        document.getElementById('sendBtn').disabled=false;
+        scrollToBottom();
+      }
+    }
 
     const greetings=['今天过得怎么样？','想我了吗？','有什么想和我聊聊的吗？','我在这里哦，随时可以找我。','嗯？在忙什么呀？','要不要一起听首歌？'];
     document.getElementById('speakBtn').addEventListener('click',function(){const key=getApiKey();const base=getApiBase();if(!key||!base){showToast('请先配置 API');return}if(isWaiting)return;const msg=greetings[Math.floor(Math.random()*greetings.length)];sendMessageToAI(msg,{silent:true})});
@@ -784,12 +1023,12 @@
     document.getElementById('tidesNextMonth').addEventListener('click',function(){tidesCurrentMonth.setMonth(tidesCurrentMonth.getMonth()+1);renderTides()});
 
     // ===== DATA =====
-    function getAllData(){loadDiary();loadMemory();return{version:'1.0',exportedAt:new Date().toISOString(),settings:{ai_name:getAiName(),ai_persona:getPersona(),start_date:getStartDate(),theme:getTheme(),api_base:getApiBase(),api_model:getApiModel()},chat:chatMessages.map(m=>({...m})),diary:diaryEntries.map(d=>({...d})),memory:memoryEntries.map(m=>({...m}))}}
-    function importAllData(data){if(!data||typeof data!=='object'){showToast('无效的数据文件');return}if(!confirm('导入将覆盖当前所有数据，确定继续吗？'))return;try{if(data.settings){if(data.settings.ai_name)localStorage.setItem('ai_name',data.settings.ai_name);if(data.settings.ai_persona)localStorage.setItem('ai_persona',data.settings.ai_persona);if(data.settings.start_date)localStorage.setItem('start_date',data.settings.start_date);if(data.settings.theme){localStorage.setItem('companion_theme',data.settings.theme);document.documentElement.setAttribute('data-theme',data.settings.theme)}if(data.settings.api_base)localStorage.setItem('custom_api',data.settings.api_base);if(data.settings.api_model)localStorage.setItem('custom_model',data.settings.api_model)}if(data.chat&&Array.isArray(data.chat)){chatMessages=[];messageByKey=new Map();messageSeq=0;for(const m of data.chat){const key=msgKey(m.id);if(!messageByKey.has(key)){const entry={...m,_key:key,_order:++messageSeq};chatMessages.push(entry);messageByKey.set(key,entry)}}let maxId=0;for(const m of chatMessages){const n=Number(m.id);if(n>maxId)maxId=n}if(maxId>0)lastId=maxId;renderMessages({stickToBottom:false})}if(data.diary&&Array.isArray(data.diary)){diaryEntries=data.diary.map(d=>({...d}));for(const d of diaryEntries){if(d._open===undefined)d._open=false}saveDiary();renderDiary()}if(data.memory&&Array.isArray(data.memory)){memoryEntries=data.memory.map(m=>({...m}));saveMemory();renderMemoryYearView()}loadConfigToUI();showToast('数据导入成功')}catch(err){showToast('导入失败: '+err.message)}}
+    function getAllData(){loadDiary();loadMemory();return{version:'1.0',exportedAt:new Date().toISOString(),settings:{ai_name:getAiName(),ai_persona:getPersona(),start_date:getStartDate(),theme:getTheme(),api_base:getApiBase(),api_model:getApiModel(),user_profile:getUserProfile()},chat:chatMessages.map(m=>({...m})),diary:diaryEntries.map(d=>({...d})),memory:memoryEntries.map(m=>({...m}))}}
+    function importAllData(data){if(!data||typeof data!=='object'){showToast('无效的数据文件');return}if(!confirm('导入将覆盖当前所有数据，确定继续吗？'))return;try{if(data.settings){if(data.settings.ai_name)localStorage.setItem('ai_name',data.settings.ai_name);if(data.settings.ai_persona)localStorage.setItem('ai_persona',data.settings.ai_persona);if(data.settings.start_date)localStorage.setItem('start_date',data.settings.start_date);if(data.settings.theme){localStorage.setItem('companion_theme',data.settings.theme);document.documentElement.setAttribute('data-theme',data.settings.theme)}if(data.settings.api_base)localStorage.setItem('custom_api',data.settings.api_base);if(data.settings.api_model)localStorage.setItem('custom_model',data.settings.api_model);if(data.settings.user_profile)localStorage.setItem('user_profile',data.settings.user_profile)}if(data.chat&&Array.isArray(data.chat)){chatMessages=[];messageByKey=new Map();messageSeq=0;for(const m of data.chat){const key=msgKey(m.id);if(!messageByKey.has(key)){const entry={...m,_key:key,_order:++messageSeq};chatMessages.push(entry);messageByKey.set(key,entry)}}let maxId=0;for(const m of chatMessages){const n=Number(m.id);if(n>maxId)maxId=n}if(maxId>0)lastId=maxId;renderMessages({stickToBottom:false})}if(data.diary&&Array.isArray(data.diary)){diaryEntries=data.diary.map(d=>({...d}));for(const d of diaryEntries){if(d._open===undefined)d._open=false}saveDiary();renderDiary()}if(data.memory&&Array.isArray(data.memory)){memoryEntries=data.memory.map(m=>({...m}));saveMemory();renderMemoryYearView()}loadConfigToUI();showToast('数据导入成功')}catch(err){showToast('导入失败: '+err.message)}}
     document.getElementById('dataExportBtn').addEventListener('click',function(){const data=getAllData();const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');const dateStr=new Date().toISOString().split('T')[0];a.download='abyssal_letter_backup_'+dateStr+'.json';a.href=url;a.click();URL.revokeObjectURL(url);showToast('数据已导出')});
     document.getElementById('dataImportBtn').addEventListener('click',function(){document.getElementById('dataImportInput').click()});
     document.getElementById('dataImportInput').addEventListener('change',function(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){try{const data=JSON.parse(ev.target.result);importAllData(data)}catch(err){showToast('文件解析失败: '+err.message)}};reader.readAsText(file);this.value=''});
-    document.getElementById('dataDeleteBtn').addEventListener('click',function(){if(!confirm('确定要删除所有数据吗？此操作不可撤销！'))return;if(!confirm('再次确认：删除所有聊天记录、日记、记忆和设置？'))return;chatMessages=[];messageByKey=new Map();messageSeq=0;renderMessages({stickToBottom:false});diaryEntries=[];saveDiary();renderDiary();memoryEntries=[];saveMemory();renderMemoryYearView();localStorage.removeItem('ai_name');localStorage.removeItem('ai_persona');localStorage.removeItem('start_date');localStorage.removeItem('custom_avatar');loadConfigToUI();showToast('所有数据已清除')});
+    document.getElementById('dataDeleteBtn').addEventListener('click',function(){if(!confirm('确定要删除所有数据吗？此操作不可撤销！'))return;if(!confirm('再次确认：删除所有聊天记录、日记、记忆和设置？'))return;chatMessages=[];messageByKey=new Map();messageSeq=0;renderMessages({stickToBottom:false});diaryEntries=[];saveDiary();renderDiary();memoryEntries=[];saveMemory();renderMemoryYearView();localStorage.removeItem('ai_name');localStorage.removeItem('ai_persona');localStorage.removeItem('start_date');localStorage.removeItem('custom_avatar');localStorage.removeItem('user_profile');loadConfigToUI();showToast('所有数据已清除')});
 
     // ============================================================
     //  🧭 Panel 控制
@@ -810,22 +1049,75 @@
     document.querySelectorAll('.back-sub').forEach(btn=>{btn.addEventListener('click',function(){const page=this.dataset.back;document.getElementById('page-'+page).classList.remove('open');if(page!=='diary'&&page!=='memory'&&page!=='tides'&&page!=='data'){if(multiSelectMode)exitMultiSelect();resetPagination()}if(page==='memory'&&memoryDetailActive){memoryDetailActive=false}})});
 
     // ============================================================
-    //  🚀 初始化
+    //  🚀 初始化（消息持久化）
     // ============================================================
+    function loadCachedMessages(){
+      try{
+        const data=localStorage.getItem('chat_messages_cache');
+        if(data){
+          const cached=JSON.parse(data);
+          if(Array.isArray(cached)&&cached.length>0){
+            for(const m of cached){
+              const key=msgKey(m.id);
+              if(!messageByKey.has(key)){
+                const entry={...m,_key:key,_order:++messageSeq};
+                chatMessages.push(entry);
+                messageByKey.set(key,entry);
+              }
+            }
+            return true;
+          }
+        }
+      }catch(e){}
+      return false;
+    }
+
+    function saveChatMessagesCache(){
+      try{
+        const toCache=sortedMessages().slice(-200).map(m=>({id:m.id,ts:m.ts,from:m.from,kind:m.kind,text:m.text,meta:m.meta||{},images:m.images||[]}));
+        localStorage.setItem('chat_messages_cache',JSON.stringify(toCache));
+      }catch(e){}
+    }
+
+    const originalAddMessage=addMessage;
+    addMessage=function(msg,opts={}){
+      const result=originalAddMessage(msg,opts);
+      saveChatMessagesCache();
+      return result;
+    };
+
+    const originalRemoveMessageById=removeMessageById;
+    removeMessageById=function(key){
+      const result=originalRemoveMessageById(key);
+      saveChatMessagesCache();
+      return result;
+    };
+
     loadConfigToUI();
+    const hasCached=loadCachedMessages();
     document.getElementById('status').textContent=getApiKey()?'online':'offline';
-    setTimeout(()=>{addMessage({id:'welcome',from:'ai',text:'👋 你好！我是 '+getAiName()+'。随时可以和我聊天。',ts:new Date().toISOString()},{stickToBottom:true})},300);
-    console.log('🚀 abyssal letter 最终版已启动');
+
+    if(!hasCached){
+      setTimeout(()=>{
+        addMessage({id:'welcome',from:'ai',text:'👋 你好！我是 '+getAiName()+'。随时可以和我聊天。',ts:new Date().toISOString()},{stickToBottom:true});
+      },300);
+    }else{
+      setTimeout(()=>{
+        renderMessages({stickToBottom:true});
+      },100);
+    }
+
+    console.log('🚀 彼端完整版已启动（气泡小尾巴 + PWA + 用户档案 + 记忆检索 + AI自动记录印象）');
     console.log('📡 API:',getApiBase()||'(未配置)');
     console.log('🎨 美化: 主题'+getTheme()+', 字体'+getFontSize()+', 圆角'+getRadius()+', 透明度'+getAlpha());
   </script>
- <script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js")
-      .catch(err => console.log("SW注册失败：", err));
-  });
-}
-</script> 
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js")
+          .catch(err => console.log("SW注册失败：", err));
+      });
+    }
+  </script> 
 </body>
 </html>
