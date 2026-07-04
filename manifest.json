@@ -1,0 +1,17 @@
+{
+  "name": "abyssal letter",
+  "short_name": "abyssal",
+  "description": "abyssal letter 网页应用",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#222222",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "F9DDF07E-169D-48E5-BD28-8FF3A5EF0900.jpeg",
+      "sizes": "any",
+      "type": "image/jpeg"
+    }
+  ]
+}
